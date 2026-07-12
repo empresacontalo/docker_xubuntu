@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
     nodejs \
-    npm \
     tesseract-ocr \
     wget \
     unzip \
