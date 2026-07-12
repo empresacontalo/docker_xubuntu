@@ -130,10 +130,5 @@ fi\n\
 ' > /etc/cont-init.d/99-custom-setup \
     && chmod +x /etc/cont-init.d/99-custom-setup
 
-# 10. Configurando o OmniRoute como um serviço em segundo plano (s6-overlay)
-RUN mkdir -p /etc/services.d/omniroute \
-    && echo '#!/usr/bin/with-contenv bash\nexec s6-setuidgid abc omniroute' > /etc/services.d/omniroute/run \
-    && chmod +x /etc/services.d/omniroute/run
-
 # Limpeza final
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
