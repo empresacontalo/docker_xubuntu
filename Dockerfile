@@ -36,7 +36,7 @@ RUN npm install -g \
     droid \
     @qoder-ai/qodercli \
     cline \
-    gemini-cli \
+    @google/gemini-cli \
     command-code
 
 # 3. Instalação de pacotes Python globais (video-use é instalado diretamente do repositório Git oficial)
