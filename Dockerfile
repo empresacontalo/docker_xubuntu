@@ -58,7 +58,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 
 # 5. Instalação do AionUi (Desktop Agent) via .deb
 RUN curl -s https://api.github.com/repos/iOfficeAI/AionUi/releases/latest \
-    | jq -r '.assets[] | select(.name | endswith(".deb")) | .browser_download_url' \
+    | jq -r '.assets[] | select(.name | endswith("amd64.deb")) | .browser_download_url' \
     | wget -qi - -O aionui.deb \
     && apt-get install -y ./aionui.deb \
     && rm aionui.deb
