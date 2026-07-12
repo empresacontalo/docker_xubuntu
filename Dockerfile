@@ -86,15 +86,15 @@ RUN windsurf_deb_url=$(curl -s "https://windsurf-stable.codeium.com/api/update/l
 
 # 8. Instalação de CLIs de terceiros via curl
 # Devin CLI
-RUN curl -fsSL https://cli.devin.ai/install.sh | bash \
-    && if [ -f /root/.devin/bin/devin ]; then cp /root/.devin/bin/devin /usr/local/bin/devin; fi
+RUN (curl -fsSL https://cli.devin.ai/install.sh | bash || true) \
+    && if [ -f /root/.local/bin/devin ]; then cp /root/.local/bin/devin /usr/local/bin/devin; fi
 
 # Hermes CLI
-RUN curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash \
+RUN (curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash || true) \
     && if [ -f /root/.local/bin/hermes ]; then cp /root/.local/bin/hermes /usr/local/bin/hermes; fi
 
 # Kiro CLI
-RUN curl -fsSL https://cli.kiro.dev/install | bash \
+RUN (curl -fsSL https://cli.kiro.dev/install | bash || true) \
     && if [ -f /root/.local/bin/kiro-cli ]; then cp /root/.local/bin/kiro-cli /usr/local/bin/kiro; fi
 
 # 9. Custom Antigravity CLI (Developed by Google DeepMind)
