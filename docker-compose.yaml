@@ -4,6 +4,7 @@ services:
   xubuntu:
     # Construindo a partir do Dockerfile local para persistir programas instalados no sistema
     build: .
+    image: ghcr.io/empresacontalo/docker_xubuntu:latest
     environment:
       - PUID=1000
       - PGID=1000
