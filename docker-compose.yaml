@@ -5,6 +5,7 @@ services:
     # Construindo a partir do Dockerfile local para persistir programas instalados no sistema
     build: .
     image: ghcr.io/empresacontalo/docker_xubuntu:latest
+    shm_size: '2gb'
     environment:
       - PUID=1000
       - PGID=1000
