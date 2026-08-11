@@ -212,7 +212,10 @@ RUN mkdir -p /etc/cont-init.d
 RUN echo '#!/bin/bash\n\
 chmod 1777 /tmp\n\
 mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
-mkdir -p /config/.config/xfce4/xfconf/xfce-perchannel-xml /config/.cache /config/Desktop\n\
+mkdir -p /run/user/1000 && chown -R abc:abc /run/user/1000 && chmod 700 /run/user/1000\n\
+dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || true\n\
+dbus-uuidgen --ensure=/var/lib/dbus/machine-id 2>/dev/null || true\n\
+mkdir -p /config/.config/xfce4/xfconf/xfce-perchannel-xml /config/.cache /config/.dbus /config/Desktop\n\
 chown -R abc:abc /config 2>/dev/null || true\n\
 chmod -R 777 /config 2>/dev/null || true\n\
 s6-setuidgid abc env HOME=/config mkdir -p /config/.config/gh /config/.local/share/gh/extensions 2>/dev/null || true\n\
@@ -221,6 +224,9 @@ if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
 fi\n\
 ' > /etc/cont-init.d/00-custom-fix \
     && chmod +x /etc/cont-init.d/00-custom-fix
+
+# Habilita log detalhado no startwm.sh (remove supressão de erro do xfce4-session)
+RUN sed -i 's/> \/dev\/null 2>&1//g' /defaults/startwm.sh 2>/dev/null || true
 
 # Limpeza final
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
