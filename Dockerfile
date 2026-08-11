@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
     libgdk-pixbuf-2.0-0 \
     libgtk-3-0 \
     libgbm1 \
-    libasound2t64 \
+    libasound2 \
     libfuse2 \
     && apt-get clean
 
@@ -210,15 +210,13 @@ echo "  refactor Refactor the selected file"\n\
 # Scripts de inicialização automática para configurar X11, Copilot e corrigir permissões do /config
 RUN mkdir -p /etc/cont-init.d
 RUN echo '#!/bin/bash\n\
-# Corrige a posse de /config e permissões do /tmp para o usuário abc (evita permission denied no XFCE / startwm.sh)\n\
 chmod 1777 /tmp\n\
 mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
 chown -R abc:abc /config 2>/dev/null || true\n\
-# Garante que as pastas do GH existam com a posse correta\n\
-su abc -c "export HOME=/config; mkdir -p /config/.config/gh /config/.local/share/gh/extensions"\n\
-# Instala o github copilot CLI para o usuário abc na inicialização se ainda não existir\n\
+# Usa s6-setuidgid em vez de su (evita poluição de sessões PAM root em /run/user/1000 e /tmp)\n\
+s6-setuidgid abc env HOME=/config mkdir -p /config/.config/gh /config/.local/share/gh/extensions 2>/dev/null || true\n\
 if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
-  su abc -c "export HOME=/config; gh extension install github/gh-copilot" || true\n\
+  s6-setuidgid abc env HOME=/config gh extension install github/gh-copilot 2>/dev/null || true\n\
 fi\n\
 ' > /etc/cont-init.d/99-custom-setup \
     && chmod +x /etc/cont-init.d/99-custom-setup
