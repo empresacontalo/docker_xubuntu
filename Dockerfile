@@ -207,19 +207,20 @@ echo "  refactor Refactor the selected file"\n\
 ' > /usr/local/bin/antigravity \
     && chmod +x /usr/local/bin/antigravity
 
-# Scripts de inicialização automática para configurar X11, Copilot e corrigir permissões do /config
+# Script de inicialização automática 00-custom-fix (executado antes de 01-config para garantir permissões no /config e X11)
 RUN mkdir -p /etc/cont-init.d
 RUN echo '#!/bin/bash\n\
 chmod 1777 /tmp\n\
 mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
+mkdir -p /config/.config/xfce4/xfconf/xfce-perchannel-xml /config/.cache /config/Desktop\n\
 chown -R abc:abc /config 2>/dev/null || true\n\
-# Usa s6-setuidgid em vez de su (evita poluição de sessões PAM root em /run/user/1000 e /tmp)\n\
+chmod -R 755 /config 2>/dev/null || true\n\
 s6-setuidgid abc env HOME=/config mkdir -p /config/.config/gh /config/.local/share/gh/extensions 2>/dev/null || true\n\
 if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
   s6-setuidgid abc env HOME=/config gh extension install github/gh-copilot 2>/dev/null || true\n\
 fi\n\
-' > /etc/cont-init.d/99-custom-setup \
-    && chmod +x /etc/cont-init.d/99-custom-setup
+' > /etc/cont-init.d/00-custom-fix \
+    && chmod +x /etc/cont-init.d/00-custom-fix
 
 # Limpeza final
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
