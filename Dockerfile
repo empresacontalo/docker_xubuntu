@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # 2. Instalação de pacotes Node.js globais
-RUN npm install -g --no-audit --no-fund \
+RUN (npm install -g --no-audit --no-fund --force \
     remotion \
     @anthropic-ai/claude-code \
     @openai/codex \
@@ -52,10 +52,10 @@ RUN npm install -g --no-audit --no-fund \
     @github/copilot \
     @google/gemini-cli \
     command-code \
-    && npm cache clean --force
+    && npm cache clean --force) || true
 
 # 3. Instalação de pacotes Python globais (video-use e XDriver são instalados diretamente dos repositórios Git oficiais)
-RUN PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages \
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages \
     edge-tts \
     faster-whisper \
     camoufox \
@@ -67,22 +67,22 @@ RUN PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packa
     langgraph \
     langfuse \
     aider-chat \
-    git+https://github.com/browser-use/video-use.git
+    git+https://github.com/browser-use/video-use.git) || true
 
 # 4. Instalação do Docker CLI (cliente apenas — daemon é o do host via socket)
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+RUN (curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
        | tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update \
     && apt-get install -y docker-ce-cli docker-compose-plugin \
-    && apt-get clean
+    && apt-get clean) || true
 
 # 5. Instalação do GitHub CLI (gh)
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+RUN (curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
     && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
     && apt-get update \
-    && apt-get install -y gh
+    && apt-get install -y gh) || true
 
 # 5. Instalação do AionUi (Desktop Agent) via .deb
 RUN (aionui_url=$(curl -sSL https://api.github.com/repos/iOfficeAI/AionUi/releases \
