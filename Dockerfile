@@ -207,14 +207,16 @@ echo "  refactor Refactor the selected file"\n\
 ' > /usr/local/bin/antigravity \
     && chmod +x /usr/local/bin/antigravity
 
-# Scripts de inicialização automática para configurar Copilot e criar atalhos na pasta persistent (/config)
+# Scripts de inicialização automática para configurar X11, Copilot e criar atalhos na pasta persistent (/config)
 RUN mkdir -p /etc/cont-init.d
 RUN echo '#!/bin/bash\n\
-# Garante que o diretório de extensões do GH existirá para o usuário abc\n\
-su abc -c "mkdir -p /config/.local/share/gh/extensions"\n\
+# Garante permissões corretas no diretório do socket X11 (evita erro _XSERVTransmkdir)\n\
+mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
+# Garante que o diretório de extensões do GH existirá para o usuário abc com HOME=/config\n\
+su abc -c "export HOME=/config; mkdir -p /config/.config/gh /config/.local/share/gh/extensions"\n\
 # Instala o github copilot CLI para o usuário abc na inicialização se ainda não existir\n\
 if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
-  su abc -c "gh extension install github/gh-copilot" || true\n\
+  su abc -c "export HOME=/config; gh extension install github/gh-copilot" || true\n\
 fi\n\
 ' > /etc/cont-init.d/99-custom-setup \
     && chmod +x /etc/cont-init.d/99-custom-setup
