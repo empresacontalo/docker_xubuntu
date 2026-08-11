@@ -16,12 +16,13 @@ services:
       - SELKIES_H264_CRF=28
       - SELKIES_VIDEO_BITRATE=6
       - SELKIES_FRAMERATE=30
+      # Autenticação de Usuário e Senha para o Webtop
+      - CUSTOM_USER=bruno
+      - PASSWORD=mudar_senha_aqui
     cap_add:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
-    ports:
-      - "3000:3000"
     volumes:
       # Diretório para dados pessoais, configurações e perfil do usuário (Webtop persistent)
       - xubuntu_data:/config
