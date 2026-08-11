@@ -31,43 +31,40 @@ RUN apt-get update && apt-get install -y \
     libfuse2 \
     && apt-get clean
 
-# 2. Instalação de pacotes Node.js globais
-RUN (npm install -g --no-audit --no-fund --force \
-    remotion \
-    @anthropic-ai/claude-code \
-    @openai/codex \
-    @pnp/office365-cli \
-    omniroute \
-    hyperframes \
-    opencode-ai \
-    @kilocode/cli \
-    droid \
-    @qoder-ai/qodercli \
-    cline \
-    @continuedev/cli \
-    @qwen-code/qwen-code \
-    forgecode \
-    codewhale \
-    @earendil-works/pi-coding-agent \
-    @github/copilot \
-    @google/gemini-cli \
-    command-code \
-    && npm cache clean --force) || true
+# 2. Instalação de pacotes Node.js globais (em camadas individuais para cache e visibilidade rápida)
+ENV CI=true
+RUN (npm install -g --no-audit --no-fund remotion) || true
+RUN (npm install -g --no-audit --no-fund @anthropic-ai/claude-code) || true
+RUN (npm install -g --no-audit --no-fund @openai/codex) || true
+RUN (npm install -g --no-audit --no-fund @pnp/office365-cli) || true
+RUN (npm install -g --no-audit --no-fund omniroute) || true
+RUN (npm install -g --no-audit --no-fund hyperframes) || true
+RUN (npm install -g --no-audit --no-fund opencode-ai) || true
+RUN (npm install -g --no-audit --no-fund @kilocode/cli) || true
+RUN (npm install -g --no-audit --no-fund droid) || true
+RUN (npm install -g --no-audit --no-fund @qoder-ai/qodercli) || true
+RUN (npm install -g --no-audit --no-fund cline) || true
+RUN (npm install -g --no-audit --no-fund @continuedev/cli) || true
+RUN (npm install -g --no-audit --no-fund @qwen-code/qwen-code) || true
+RUN (npm install -g --no-audit --no-fund forgecode) || true
+RUN (npm install -g --no-audit --no-fund codewhale) || true
+RUN (npm install -g --no-audit --no-fund @earendil-works/pi-coding-agent) || true
+RUN (npm install -g --no-audit --no-fund @github/copilot) || true
+RUN (npm install -g --no-audit --no-fund @google/gemini-cli) || true
+RUN (npm install -g --no-audit --no-fund command-code) || true
+RUN npm cache clean --force || true
 
-# 3. Instalação de pacotes Python globais (video-use e XDriver são instalados diretamente dos repositórios Git oficiais)
-RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages \
-    edge-tts \
-    faster-whisper \
-    camoufox \
-    patchright \
-    git+https://github.com/arjun-sha/XDriver.git \
-    botasaurus \
-    seleniumbase \
-    langchain \
-    langgraph \
-    langfuse \
-    aider-chat \
-    git+https://github.com/browser-use/video-use.git) || true
+# 3. Instalação de pacotes Python globais (em camadas individuais)
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages edge-tts) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages faster-whisper) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages camoufox) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages patchright) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages git+https://github.com/arjun-sha/XDriver.git) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages botasaurus) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages seleniumbase) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages langchain langgraph langfuse) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages aider-chat) || true
+RUN (PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages git+https://github.com/browser-use/video-use.git) || true
 
 # 4. Instalação do Docker CLI (cliente apenas — daemon é o do host via socket)
 RUN (curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
