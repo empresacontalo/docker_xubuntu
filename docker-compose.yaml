@@ -5,7 +5,6 @@ services:
     # Construindo a partir do Dockerfile local para persistir programas instalados no sistema
     build: .
     image: ghcr.io/empresacontalo/docker_xubuntu:latest
-    shm_size: '2gb'
     environment:
       - PUID=1000
       - PGID=1000
@@ -14,19 +13,20 @@ services:
     volumes:
       # Nesta imagem, o diretório usado para dados pessoais e configurações é o /config.
       - xubuntu_data:/config
+      - xubuntu_data_root:/root
+      - xubuntu_data_home:/home
+      - xubuntu_data_opt_completo:/opt
+      # Workaround para substituir o shm_size no Docker Swarm:
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 2147483648 # 2GB em bytes
+      # Acesso ao Docker do host para build de imagens e gerenciamento de stacks
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       # Mantendo o acesso às outras stacks (que poderão acessá-lo via xubuntu:3000 internamente)
       - app_network
-      - npm_public
-    ports:
-      # Exportando a porta 3010 no host. 
-      # ATENÇÃO: Como o Swarm não suporta 'host_ip' nesta versão de arquivo, a porta será aberta em 0.0.0.0.
-      # DICA: Se você for acessar EXCLUSIVAMENTE pelo subdomínio via Nginx Proxy Manager, 
-      # você pode DELETAR este bloco 'ports' inteiro por segurança, pois o NPM não precisa dele!
-      - target: 3000
-        published: 3010
-        protocol: tcp
-        mode: host
+      - npm_swarm
     deploy:
       mode: replicated
       replicas: 1
@@ -39,11 +39,17 @@ services:
 volumes:
   xubuntu_data:
     driver: local
+  xubuntu_data_root:
+    driver: local
+  xubuntu_data_home:
+    driver: local
+  xubuntu_data_opt_completo:
+    driver: local
 
 networks:
   app_network:
     external: true
     name: app_network
-  npm_public:
+  npm_swarm:
     external: true
-    name: npm_public
+    name: npm_swarm
