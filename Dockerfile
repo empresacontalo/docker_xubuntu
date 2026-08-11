@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # 2. Instalação de pacotes Node.js globais
-RUN npm install -g \
+RUN npm install -g --no-audit --no-fund \
     remotion \
     @anthropic-ai/claude-code \
     @openai/codex \
@@ -51,10 +51,11 @@ RUN npm install -g \
     @earendil-works/pi-coding-agent \
     @github/copilot \
     @google/gemini-cli \
-    command-code
+    command-code \
+    && npm cache clean --force
 
 # 3. Instalação de pacotes Python globais (video-use e XDriver são instalados diretamente dos repositórios Git oficiais)
-RUN PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --break-system-packages \
+RUN PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --no-cache-dir --break-system-packages \
     edge-tts \
     faster-whisper \
     camoufox \
