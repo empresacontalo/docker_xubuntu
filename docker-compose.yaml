@@ -11,8 +11,11 @@ services:
       - TZ=America/Sao_Paulo
       - DATA_DIR=/config/.omniroute
     volumes:
-      # Diretório para dados pessoais, configurações e perfil do usuário (Webtop persistent)
+      # Nesta imagem, o diretório usado para dados pessoais e configurações é o /config.
       - xubuntu_data:/config
+      - xubuntu_data_root:/root
+      - xubuntu_data_home:/home
+      - xubuntu_data_opt_completo:/opt
       # Workaround para substituir o shm_size no Docker Swarm:
       - type: tmpfs
         target: /dev/shm
@@ -35,6 +38,12 @@ services:
 
 volumes:
   xubuntu_data:
+    driver: local
+  xubuntu_data_root:
+    driver: local
+  xubuntu_data_home:
+    driver: local
+  xubuntu_data_opt_completo:
     driver: local
 
 networks:
