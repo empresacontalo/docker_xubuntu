@@ -225,8 +225,9 @@ fi\n\
 ' > /etc/cont-init.d/00-custom-fix \
     && chmod +x /etc/cont-init.d/00-custom-fix
 
-# Habilita log detalhado no startwm.sh (remove supressão de erro do xfce4-session)
-RUN sed -i 's/> \/dev\/null 2>&1//g' /defaults/startwm.sh 2>/dev/null || true
+# Garante DISPLAY=:1 e habilita log detalhado no startwm.sh
+RUN sed -i '1a export DISPLAY=${DISPLAY:-:1}' /defaults/startwm.sh \
+    && sed -i 's/> \/dev\/null 2>&1//g' /defaults/startwm.sh 2>/dev/null || true
 
 # Limpeza final
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*

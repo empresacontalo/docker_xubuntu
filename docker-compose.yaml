@@ -10,6 +10,7 @@ services:
       - PGID=1000
       - TZ=America/Sao_Paulo
       - DATA_DIR=/config/.omniroute
+      - DISPLAY=:1
       # Selkies — cursor via browser CSS (fix: cursor invisível no X11)
       - SELKIES_USE_BROWSER_CURSORS=true
     cap_add:
