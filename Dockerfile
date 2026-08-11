@@ -1,7 +1,9 @@
 FROM lscr.io/linuxserver/webtop:ubuntu-xfce
 
-# Evita perguntas interativas durante a instalação do apt
+# Evita perguntas interativas durante a instalação do apt e força suporte a UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV PYTHONUTF8=1
 
 # 1. Instalação de dependências do sistema e utilitários
 RUN apt-get update && apt-get install -y \
@@ -78,11 +80,13 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt-get install -y gh
 
 # 5. Instalação do AionUi (Desktop Agent) via .deb
-RUN curl -s https://api.github.com/repos/iOfficeAI/AionUi/releases/latest \
-    | jq -r '.assets[] | select(.name | endswith("amd64.deb")) | .browser_download_url' \
-    | wget -qi - -O aionui.deb \
-    && apt-get install -y ./aionui.deb \
-    && rm aionui.deb
+RUN aionui_url=$(curl -fsSL https://api.github.com/repos/iOfficeAI/AionUi/releases \
+       | jq -r '.[].assets[]? | select(.name | endswith("amd64.deb")) | .browser_download_url' | head -1) \
+    && if [ -n "$aionui_url" ]; then \
+         wget -q "$aionui_url" -O aionui.deb \
+         && (dpkg -i aionui.deb || apt-get install -f -y) \
+         && rm -f aionui.deb; \
+       fi || true
 
 # 6. Instalação do Cursor Editor (Debian Package oficial para maior integração com o sistema)
 RUN wget -O cursor.deb https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/3.11 \
@@ -146,10 +150,12 @@ RUN (curl -fsSL https://jcode.sh/install | bash || true) \
 
 # Smelt (Lua-scriptable AI coding agent) — instala via release binário
 RUN smelt_url=$(curl -fsSL https://api.github.com/repos/leonardcser/smelt/releases/latest \
-       | jq -r '.assets[] | select(.name | test("smelt.*linux.*x86_64")) | .browser_download_url' | head -1) \
+       | jq -r '.assets[] | select(.name | test("smelt-x86_64.*linux.*\\.tar\\.gz$")) | .browser_download_url' | head -1) \
     && if [ -n "$smelt_url" ]; then \
-         wget -q "$smelt_url" -O /usr/local/bin/smelt \
-         && chmod +x /usr/local/bin/smelt; \
+         wget -q "$smelt_url" -O /tmp/smelt.tar.gz \
+         && tar -xzf /tmp/smelt.tar.gz -C /usr/local/bin \
+         && chmod +x /usr/local/bin/smelt 2>/dev/null || true \
+         && rm -f /tmp/smelt.tar.gz; \
        fi || true
 
 # Obscura (headless browser stealth para AI agents — binário com TLS impersonation)
