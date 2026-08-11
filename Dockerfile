@@ -210,10 +210,10 @@ echo "  refactor Refactor the selected file"\n\
 # Scripts de inicialização automática para configurar X11, Copilot e corrigir permissões do /config
 RUN mkdir -p /etc/cont-init.d
 RUN echo '#!/bin/bash\n\
-# Corrige a posse de /config para o usuário abc (evita permission denied no XFCE / startwm.sh)\n\
-chown -R abc:abc /config 2>/dev/null || true\n\
-# Garante permissões corretas no diretório do socket X11 (evita erro _XSERVTransmkdir)\n\
+# Corrige a posse de /config e permissões do /tmp para o usuário abc (evita permission denied no XFCE / startwm.sh)\n\
+chmod 1777 /tmp\n\
 mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
+chown -R abc:abc /config 2>/dev/null || true\n\
 # Garante que as pastas do GH existam com a posse correta\n\
 su abc -c "export HOME=/config; mkdir -p /config/.config/gh /config/.local/share/gh/extensions"\n\
 # Instala o github copilot CLI para o usuário abc na inicialização se ainda não existir\n\
