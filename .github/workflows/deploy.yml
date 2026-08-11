@@ -1,10 +1,8 @@
 name: Build and Publish Docker Image
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    # Build manual apenas — use build-and-push.sh na VPS para deploy automático
 
 env:
   REGISTRY: ghcr.io
