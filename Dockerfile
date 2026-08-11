@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    python3-dev \
+    build-essential \
     nodejs \
     tesseract-ocr \
     wget \
@@ -41,20 +43,12 @@ RUN npm install -g \
     @google/gemini-cli \
     command-code
 
-# 3. Instalação de pacotes Python globais (video-use é instalado diretamente do repositório Git oficial)
-RUN pip3 install --break-system-packages \
-    edge-tts \
-    faster-whisper \
-    camoufox \
-    patchright \
-    git+https://github.com/arjun-sha/XDriver.git \
-    botasaurus \
-    seleniumbase \
-    langchain \
-    langgraph \
-    langfuse \
-    aider-chat \
-    git+https://github.com/browser-use/video-use.git
+# 3. Instalação de pacotes Python globais (separados para evitar falha de resolução do pip)
+RUN pip3 install --break-system-packages edge-tts faster-whisper camoufox patchright
+RUN pip3 install --break-system-packages git+https://github.com/arjun-sha/XDriver.git botasaurus seleniumbase
+RUN pip3 install --break-system-packages langchain langgraph langfuse || true
+RUN pip3 install --break-system-packages aider-chat || true
+RUN pip3 install --break-system-packages git+https://github.com/browser-use/video-use.git || true
 
 # 4. Instalação do Docker CLI (cliente apenas — daemon é o do host via socket)
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
