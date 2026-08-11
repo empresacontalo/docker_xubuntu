@@ -207,27 +207,6 @@ echo "  refactor Refactor the selected file"\n\
 ' > /usr/local/bin/antigravity \
     && chmod +x /usr/local/bin/antigravity
 
-# Script de inicialização automática 00-custom-fix (executado antes de 01-config para garantir permissões no /config e X11)
-RUN mkdir -p /etc/cont-init.d
-RUN echo '#!/bin/bash\n\
-chmod 1777 /tmp\n\
-mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
-mkdir -p /run/user/1000 && chown -R abc:abc /run/user/1000 && chmod 700 /run/user/1000\n\
-dbus-uuidgen --ensure=/etc/machine-id 2>/dev/null || true\n\
-dbus-uuidgen --ensure=/var/lib/dbus/machine-id 2>/dev/null || true\n\
-mkdir -p /config/.config/xfce4/xfconf/xfce-perchannel-xml /config/.cache /config/.dbus /config/Desktop\n\
-chown -R abc:abc /config 2>/dev/null || true\n\
-chmod -R 777 /config 2>/dev/null || true\n\
-s6-setuidgid abc env HOME=/config mkdir -p /config/.config/gh /config/.local/share/gh/extensions 2>/dev/null || true\n\
-if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
-  s6-setuidgid abc env HOME=/config gh extension install github/gh-copilot 2>/dev/null || true\n\
-fi\n\
-' > /etc/cont-init.d/00-custom-fix \
-    && chmod +x /etc/cont-init.d/00-custom-fix
-
-# Garante DISPLAY=:1 e habilita log detalhado no startwm.sh
-RUN sed -i '1a export DISPLAY=${DISPLAY:-:1}' /defaults/startwm.sh \
-    && sed -i 's/> \/dev\/null 2>&1//g' /defaults/startwm.sh 2>/dev/null || true
-
-# Limpeza final
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Limpeza final e permissões
+RUN chmod 1777 /tmp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
