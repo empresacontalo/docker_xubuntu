@@ -4,14 +4,18 @@ FROM lscr.io/linuxserver/webtop:ubuntu-xfce
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV PYTHONUTF8=1
+ENV APPIMAGE_EXTRACT_AND_RUN=1
 
 # 1. Instalação de dependências do sistema e utilitários
 RUN apt-get update && apt-get install -y \
     curl \
     git \
+    build-essential \
+    squashfs-tools \
     python3 \
     python3-pip \
     python3-venv \
+    python3-dev \
     nodejs \
     tesseract-ocr \
     wget \
