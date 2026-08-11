@@ -53,8 +53,8 @@ RUN npm install -g \
     @google/gemini-cli \
     command-code
 
-# 3. Instalação de pacotes Python globais (video-use é instalado diretamente do repositório Git oficial)
-RUN pip3 install --break-system-packages \
+# 3. Instalação de pacotes Python globais (video-use e XDriver são instalados diretamente dos repositórios Git oficiais)
+RUN PYTHONUTF8=1 LC_ALL=C.UTF-8 pip3 install --break-system-packages \
     edge-tts \
     faster-whisper \
     camoufox \
