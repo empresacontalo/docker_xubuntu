@@ -1,9 +1,8 @@
 name: Build and Publish Docker Image
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    # Trigger manual apenas — validar build local primeiro antes de habilitar push automático
 
 env:
   REGISTRY: ghcr.io
