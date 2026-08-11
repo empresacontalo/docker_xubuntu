@@ -108,7 +108,7 @@ echo '  Docker CLI: '$(docker --version)
 # --- 8. Push para GHCR ---
 echo ""
 read -p "Fazer push para ${IMAGE}? [s/N] " CONFIRM
-if [[ "$CONFIRM" =~ ^[sS]$ ]]; then
+if [[ "$CONFIRM" =~ ^[sS]$ ]] || [[ "$1" == "-y" ]] || [[ "$2" == "-y" ]]; then
     log "Fazendo push da imagem para o GHCR..."
     docker push "$IMAGE"
     echo ""
