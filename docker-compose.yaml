@@ -20,6 +20,8 @@ services:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
+    ports:
+      - "3000:3000"
     volumes:
       # Diretório para dados pessoais, configurações e perfil do usuário (Webtop persistent)
       - xubuntu_data:/config
