@@ -11,8 +11,11 @@ services:
       - TZ=America/Sao_Paulo
       - DATA_DIR=/config/.omniroute
       - DISPLAY=:1
-      # Selkies — cursor via browser CSS (fix: cursor invisível no X11)
+      # Selkies — performance e estabilidade para CPU Software Encoding
       - SELKIES_USE_BROWSER_CURSORS=true
+      - SELKIES_H264_CRF=28
+      - SELKIES_VIDEO_BITRATE=6
+      - SELKIES_FRAMERATE=30
     cap_add:
       - SYS_ADMIN
     security_opt:
