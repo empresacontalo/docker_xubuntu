@@ -17,12 +17,13 @@ services:
       - SELKIES_FRAMERATE=30
       - SELKIES_VIDEO_BITRATE=8
       - SELKIES_H264_CRF=25
+    cap_add:
+      - SYS_ADMIN
     volumes:
-      # Nesta imagem, o diretório usado para dados pessoais e configurações é o /config.
+      # Diretório para dados pessoais, configurações e perfil do usuário (Webtop persistent)
       - xubuntu_data:/config
-      - xubuntu_data_root:/root
-      - xubuntu_data_home:/home
-      - xubuntu_data_opt_completo:/opt
+      # Dispositivo virtual de entrada para o Selkies (necessário para clique/movimento do mouse e teclado)
+      - /dev/uinput:/dev/uinput
       # Workaround para substituir o shm_size no Docker Swarm:
       - type: tmpfs
         target: /dev/shm
@@ -45,12 +46,6 @@ services:
 
 volumes:
   xubuntu_data:
-    driver: local
-  xubuntu_data_root:
-    driver: local
-  xubuntu_data_home:
-    driver: local
-  xubuntu_data_opt_completo:
     driver: local
 
 networks:
