@@ -19,11 +19,11 @@ services:
       - SELKIES_H264_CRF=25
     cap_add:
       - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
     volumes:
       # Diretório para dados pessoais, configurações e perfil do usuário (Webtop persistent)
       - xubuntu_data:/config
-      # Dispositivo virtual de entrada para o Selkies (necessário para clique/movimento do mouse e teclado)
-      - /dev/uinput:/dev/uinput
       # Workaround para substituir o shm_size no Docker Swarm:
       - type: tmpfs
         target: /dev/shm
