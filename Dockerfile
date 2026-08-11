@@ -83,38 +83,41 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt-get update \
     && apt-get install -y gh
 
+# ARG para token de autenticação do GitHub (passado via GitHub Actions)
+ARG GITHUB_TOKEN=""
+
 # 5. Instalação do AionUi (Desktop Agent) via .deb
-RUN aionui_url=$(curl -fsSL https://api.github.com/repos/iOfficeAI/AionUi/releases \
+RUN (aionui_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/iOfficeAI/AionUi/releases \
        | jq -r '.[].assets[]? | select(.name | endswith("amd64.deb")) | .browser_download_url' | head -1) \
     && if [ -n "$aionui_url" ]; then \
          wget -q "$aionui_url" -O aionui.deb \
          && (dpkg -i aionui.deb || apt-get install -f -y) \
          && rm -f aionui.deb; \
-       fi || true
+       fi) || true
 
 # 6. Instalação do Cursor Editor (Debian Package oficial para maior integração com o sistema)
-RUN wget -O cursor.deb https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/3.11 \
+RUN (wget -O cursor.deb https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/3.11 \
     && (dpkg -i cursor.deb || apt-get install -f -y) \
-    && rm cursor.deb \
+    && rm -f cursor.deb \
     && if [ -f /usr/bin/cursor ]; then \
          mv /usr/bin/cursor /usr/bin/cursor-real \
          && echo '#!/bin/bash\nexec /usr/bin/cursor-real --no-sandbox "$@"' > /usr/bin/cursor \
          && chmod +x /usr/bin/cursor; \
-       fi
+       fi) || true
 
 # 7. Instalação do Windsurf Editor (Debian Package oficial)
-RUN windsurf_deb_url=$(curl -s "https://windsurf-stable.codeium.com/api/update/linux-x64-deb/stable/latest" | jq -r '.url') \
+RUN (windsurf_deb_url=$(curl -s "https://windsurf-stable.codeium.com/api/update/linux-x64-deb/stable/latest" | jq -r '.url') \
     && curl -L "$windsurf_deb_url" -o windsurf.deb \
     && (dpkg -i windsurf.deb || apt-get install -f -y) \
-    && rm windsurf.deb \
+    && rm -f windsurf.deb \
     && if [ -f /usr/bin/windsurf ]; then \
          mv /usr/bin/windsurf /usr/bin/windsurf-real \
          && echo '#!/bin/bash\nexec /usr/bin/windsurf-real --no-sandbox "$@"' > /usr/bin/windsurf \
          && chmod +x /usr/bin/windsurf; \
-       fi
+       fi) || true
 
 # 8. Instalação do Visual Studio Code (via repositório oficial Microsoft)
-RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
+RUN (wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
        > /etc/apt/sources.list.d/vscode.list \
     && apt-get update \
@@ -124,16 +127,18 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
          mv /usr/bin/code /usr/bin/code-real \
          && echo '#!/bin/bash\nexec /usr/bin/code-real --no-sandbox "$@"' > /usr/bin/code \
          && chmod +x /usr/bin/code; \
-       fi
+       fi) || true
 
 # 9. Instalação do Android Studio (via JetBrains API — sempre a versão estável mais recente)
-RUN studio_url=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=AI&latest=true&type=release" \
+RUN (studio_url=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=AI&latest=true&type=release" \
        | jq -r '.AI[0].downloads.linux.link') \
-    && wget -q "$studio_url" -O /tmp/android-studio.tar.gz \
-    && tar -xzf /tmp/android-studio.tar.gz -C /opt \
-    && rm /tmp/android-studio.tar.gz \
-    && echo '#!/bin/bash\nexec /opt/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
-    && chmod +x /usr/local/bin/android-studio
+    && if [ -n "$studio_url" ]; then \
+         wget -q "$studio_url" -O /tmp/android-studio.tar.gz \
+         && tar -xzf /tmp/android-studio.tar.gz -C /opt \
+         && rm -f /tmp/android-studio.tar.gz \
+         && echo '#!/bin/bash\nexec /opt/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
+         && chmod +x /usr/local/bin/android-studio; \
+       fi) || true
 
 # 10. Instalação de CLIs de terceiros via curl
 # Devin CLI
@@ -153,35 +158,38 @@ RUN (curl -fsSL https://jcode.sh/install | bash || true) \
     && if [ -f /root/.local/bin/jcode ]; then cp /root/.local/bin/jcode /usr/local/bin/jcode; fi
 
 # Smelt (Lua-scriptable AI coding agent) — instala via release binário
-RUN smelt_url=$(curl -fsSL https://api.github.com/repos/leonardcser/smelt/releases/latest \
-       | jq -r '.assets[] | select(.name | test("smelt-x86_64.*linux.*\\.tar\\.gz$")) | .browser_download_url' | head -1) \
+RUN (smelt_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/leonardcser/smelt/releases/latest \
+       | jq -r '.assets[]? | select(.name | test("smelt-x86_64.*linux.*\\.tar\\.gz$")) | .browser_download_url' | head -1) \
     && if [ -n "$smelt_url" ]; then \
          wget -q "$smelt_url" -O /tmp/smelt.tar.gz \
          && tar -xzf /tmp/smelt.tar.gz -C /usr/local/bin \
          && chmod +x /usr/local/bin/smelt 2>/dev/null || true \
          && rm -f /tmp/smelt.tar.gz; \
-       fi || true
+       fi) || true
 
 # Obscura (headless browser stealth para AI agents — binário com TLS impersonation)
-RUN obscura_url=$(curl -fsSL https://api.github.com/repos/h4ckf0r0day/obscura/releases/latest \
-       | jq -r '.assets[] | select(.name | test("obscura-x86_64-linux.*stealth")) | .browser_download_url' | head -1) \
+RUN (obscura_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/h4ckf0r0day/obscura/releases/latest \
+       | jq -r '.assets[]? | select(.name | test("obscura-x86_64-linux.*stealth")) | .browser_download_url' | head -1) \
     && if [ -n "$obscura_url" ]; then \
          wget -q "$obscura_url" -O /tmp/obscura.tar.gz \
          && tar -xzf /tmp/obscura.tar.gz -C /usr/local/bin \
          && chmod +x /usr/local/bin/obscura /usr/local/bin/obscura-worker 2>/dev/null || true \
-         && rm /tmp/obscura.tar.gz; \
-       fi || true
+         && rm -f /tmp/obscura.tar.gz; \
+       fi) || true
 
 # OpenWork (alternativa open-source ao Claude Cowork, powered by opencode)
-RUN openwork_url=$(curl -fsSL https://api.github.com/repos/different-ai/openwork/releases/latest \
-       | jq -r '.assets[] | select(.name | test("openwork-cloud-linux-x86_64.*\\.AppImage$")) | .browser_download_url') \
-    && wget -q "$openwork_url" -O /tmp/openwork.AppImage \
-    && chmod +x /tmp/openwork.AppImage \
-    && cd /tmp && /tmp/openwork.AppImage --appimage-extract \
-    && mv /tmp/squashfs-root /opt/openwork \
-    && rm /tmp/openwork.AppImage \
-    && echo '#!/bin/bash\nexec /opt/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
-    && chmod +x /usr/local/bin/openwork
+RUN (openwork_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/different-ai/openwork/releases/latest \
+       | jq -r '.assets[]? | select(.name | test("openwork-cloud-linux-x86_64.*\\.AppImage$")) | .browser_download_url' | head -1) \
+    && if [ -n "$openwork_url" ]; then \
+         wget -q "$openwork_url" -O /tmp/openwork.AppImage \
+         && chmod +x /tmp/openwork.AppImage \
+         && cd /tmp && /tmp/openwork.AppImage --appimage-extract \
+         && rm -rf /opt/openwork \
+         && mv /tmp/squashfs-root /opt/openwork \
+         && rm -f /tmp/openwork.AppImage \
+         && echo '#!/bin/bash\nexec /opt/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
+         && chmod +x /usr/local/bin/openwork; \
+       fi) || true
 
 # 9. Custom Antigravity CLI (Developed by Google DeepMind)
 RUN echo '#!/bin/bash\n\
