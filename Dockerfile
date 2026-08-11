@@ -83,11 +83,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt-get update \
     && apt-get install -y gh
 
-# ARG para token de autenticação do GitHub (passado via GitHub Actions)
-ARG GITHUB_TOKEN=""
-
 # 5. Instalação do AionUi (Desktop Agent) via .deb
-RUN (aionui_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/iOfficeAI/AionUi/releases \
+RUN (aionui_url=$(curl -sSL https://api.github.com/repos/iOfficeAI/AionUi/releases \
        | jq -r '.[].assets[]? | select(.name | endswith("amd64.deb")) | .browser_download_url' | head -1) \
     && if [ -n "$aionui_url" ]; then \
          wget -q "$aionui_url" -O aionui.deb \
@@ -158,7 +155,7 @@ RUN (curl -fsSL https://jcode.sh/install | bash || true) \
     && if [ -f /root/.local/bin/jcode ]; then cp /root/.local/bin/jcode /usr/local/bin/jcode; fi
 
 # Smelt (Lua-scriptable AI coding agent) — instala via release binário
-RUN (smelt_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/leonardcser/smelt/releases/latest \
+RUN (smelt_url=$(curl -sSL https://api.github.com/repos/leonardcser/smelt/releases/latest \
        | jq -r '.assets[]? | select(.name | test("smelt-x86_64.*linux.*\\.tar\\.gz$")) | .browser_download_url' | head -1) \
     && if [ -n "$smelt_url" ]; then \
          wget -q "$smelt_url" -O /tmp/smelt.tar.gz \
@@ -168,7 +165,7 @@ RUN (smelt_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKE
        fi) || true
 
 # Obscura (headless browser stealth para AI agents — binário com TLS impersonation)
-RUN (obscura_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/h4ckf0r0day/obscura/releases/latest \
+RUN (obscura_url=$(curl -sSL https://api.github.com/repos/h4ckf0r0day/obscura/releases/latest \
        | jq -r '.assets[]? | select(.name | test("obscura-x86_64-linux.*stealth")) | .browser_download_url' | head -1) \
     && if [ -n "$obscura_url" ]; then \
          wget -q "$obscura_url" -O /tmp/obscura.tar.gz \
@@ -178,7 +175,7 @@ RUN (obscura_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TO
        fi) || true
 
 # OpenWork (alternativa open-source ao Claude Cowork, powered by opencode)
-RUN (openwork_url=$(curl -sSL ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} https://api.github.com/repos/different-ai/openwork/releases/latest \
+RUN (openwork_url=$(curl -sSL https://api.github.com/repos/different-ai/openwork/releases/latest \
        | jq -r '.assets[]? | select(.name | test("openwork-cloud-linux-x86_64.*\\.AppImage$")) | .browser_download_url' | head -1) \
     && if [ -n "$openwork_url" ]; then \
          wget -q "$openwork_url" -O /tmp/openwork.AppImage \
