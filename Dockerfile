@@ -214,7 +214,7 @@ chmod 1777 /tmp\n\
 mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix\n\
 mkdir -p /config/.config/xfce4/xfconf/xfce-perchannel-xml /config/.cache /config/Desktop\n\
 chown -R abc:abc /config 2>/dev/null || true\n\
-chmod -R 755 /config 2>/dev/null || true\n\
+chmod -R 777 /config 2>/dev/null || true\n\
 s6-setuidgid abc env HOME=/config mkdir -p /config/.config/gh /config/.local/share/gh/extensions 2>/dev/null || true\n\
 if [ ! -d /config/.local/share/gh/extensions/gh-copilot ]; then\n\
   s6-setuidgid abc env HOME=/config gh extension install github/gh-copilot 2>/dev/null || true\n\

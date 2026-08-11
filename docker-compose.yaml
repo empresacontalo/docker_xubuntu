@@ -12,11 +12,6 @@ services:
       - DATA_DIR=/config/.omniroute
       # Selkies — cursor via browser CSS (fix: cursor invisível no X11)
       - SELKIES_USE_BROWSER_CURSORS=true
-      # Selkies — performance e estabilidade
-      - SELKIES_ENCODER=x264enc
-      - SELKIES_FRAMERATE=30
-      - SELKIES_VIDEO_BITRATE=8
-      - SELKIES_H264_CRF=25
     cap_add:
       - SYS_ADMIN
     security_opt:
