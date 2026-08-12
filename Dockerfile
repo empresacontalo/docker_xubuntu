@@ -43,12 +43,18 @@ RUN npm install -g \
     @google/gemini-cli \
     command-code
 
-# 3. Instalação de pacotes Python globais (separados para evitar falha de resolução do pip)
-RUN pip3 install --break-system-packages edge-tts faster-whisper camoufox patchright
-RUN pip3 install --break-system-packages git+https://github.com/arjun-sha/XDriver.git botasaurus seleniumbase
-RUN pip3 install --break-system-packages langchain langgraph langfuse || true
-RUN pip3 install --break-system-packages aider-chat || true
-RUN pip3 install --break-system-packages git+https://github.com/browser-use/video-use.git || true
+# 3. Instalação de pacotes Python em um ambiente virtual isolado (para não quebrar o X11/Selkies do Webtop)
+RUN python3 -m venv /usr/local/ai-env \
+    && /usr/local/ai-env/bin/pip install edge-tts faster-whisper camoufox patchright \
+    && /usr/local/ai-env/bin/pip install git+https://github.com/arjun-sha/XDriver.git botasaurus seleniumbase \
+    && /usr/local/ai-env/bin/pip install langchain langgraph langfuse || true \
+    && /usr/local/ai-env/bin/pip install aider-chat || true \
+    && /usr/local/ai-env/bin/pip install git+https://github.com/browser-use/video-use.git || true \
+    && ln -s /usr/local/ai-env/bin/aider /usr/local/bin/aider \
+    && ln -s /usr/local/ai-env/bin/edge-tts /usr/local/bin/edge-tts \
+    && ln -s /usr/local/ai-env/bin/camoufox /usr/local/bin/camoufox \
+    && ln -s /usr/local/ai-env/bin/patchright /usr/local/bin/patchright \
+    && ln -s /usr/local/ai-env/bin/botasaurus /usr/local/bin/botasaurus || true
 
 # 4. Instalação do Docker CLI (cliente apenas — daemon é o do host via socket)
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
@@ -105,9 +111,9 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
 RUN studio_url=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=AI&latest=true&type=release" | jq -r '.AI[0].downloads.linux.link') \
     && if [ "$studio_url" != "null" ] && [ -n "$studio_url" ]; then \
          wget -q "$studio_url" -O /tmp/android-studio.tar.gz \
-         && tar -xzf /tmp/android-studio.tar.gz -C /opt \
+         && tar -xzf /tmp/android-studio.tar.gz -C /usr/local/lib \
          && rm /tmp/android-studio.tar.gz \
-         && echo '#!/bin/bash\nexec /opt/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
+         && echo '#!/bin/bash\nexec /usr/local/lib/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
          && chmod +x /usr/local/bin/android-studio; \
        else \
          echo "Android Studio API failed, skipping installation."; \
@@ -155,9 +161,9 @@ RUN openwork_url=$(curl -fsSL https://api.github.com/repos/different-ai/openwork
          wget -q "$openwork_url" -O /tmp/openwork.AppImage \
          && chmod +x /tmp/openwork.AppImage \
          && cd /tmp && /tmp/openwork.AppImage --appimage-extract \
-         && mv /tmp/squashfs-root /opt/openwork \
+         && mv /tmp/squashfs-root /usr/local/lib/openwork \
          && rm /tmp/openwork.AppImage \
-         && echo '#!/bin/bash\nexec /opt/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
+         && echo '#!/bin/bash\nexec /usr/local/lib/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
          && chmod +x /usr/local/bin/openwork; \
        else \
          echo "OpenWork API failed, skipping installation."; \
