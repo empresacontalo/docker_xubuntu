@@ -102,13 +102,16 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
        fi
 
 # 9. Instalação do Android Studio (via JetBrains API — sempre a versão estável mais recente)
-RUN studio_url=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=AI&latest=true&type=release" \
-       | jq -r '.AI[0].downloads.linux.link') \
-    && wget -q "$studio_url" -O /tmp/android-studio.tar.gz \
-    && tar -xzf /tmp/android-studio.tar.gz -C /opt \
-    && rm /tmp/android-studio.tar.gz \
-    && echo '#!/bin/bash\nexec /opt/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
-    && chmod +x /usr/local/bin/android-studio
+RUN studio_url=$(curl -fsSL "https://data.services.jetbrains.com/products/releases?code=AI&latest=true&type=release" | jq -r '.AI[0].downloads.linux.link') \
+    && if [ "$studio_url" != "null" ] && [ -n "$studio_url" ]; then \
+         wget -q "$studio_url" -O /tmp/android-studio.tar.gz \
+         && tar -xzf /tmp/android-studio.tar.gz -C /opt \
+         && rm /tmp/android-studio.tar.gz \
+         && echo '#!/bin/bash\nexec /opt/android-studio/bin/studio.sh "$@"' > /usr/local/bin/android-studio \
+         && chmod +x /usr/local/bin/android-studio; \
+       else \
+         echo "Android Studio API failed, skipping installation."; \
+       fi
 
 # 10. Instalação de CLIs de terceiros via curl
 # Devin CLI
@@ -148,13 +151,17 @@ RUN obscura_url=$(curl -fsSL https://api.github.com/repos/h4ckf0r0day/obscura/re
 # OpenWork (alternativa open-source ao Claude Cowork, powered by opencode)
 RUN openwork_url=$(curl -fsSL https://api.github.com/repos/different-ai/openwork/releases/latest \
        | jq -r '.assets[] | select(.name | test("openwork-cloud-linux-x86_64.*\\.AppImage$")) | .browser_download_url') \
-    && wget -q "$openwork_url" -O /tmp/openwork.AppImage \
-    && chmod +x /tmp/openwork.AppImage \
-    && cd /tmp && /tmp/openwork.AppImage --appimage-extract \
-    && mv /tmp/squashfs-root /opt/openwork \
-    && rm /tmp/openwork.AppImage \
-    && echo '#!/bin/bash\nexec /opt/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
-    && chmod +x /usr/local/bin/openwork
+    && if [ "$openwork_url" != "null" ] && [ -n "$openwork_url" ]; then \
+         wget -q "$openwork_url" -O /tmp/openwork.AppImage \
+         && chmod +x /tmp/openwork.AppImage \
+         && cd /tmp && /tmp/openwork.AppImage --appimage-extract \
+         && mv /tmp/squashfs-root /opt/openwork \
+         && rm /tmp/openwork.AppImage \
+         && echo '#!/bin/bash\nexec /opt/openwork/openwork --no-sandbox "$@"' > /usr/local/bin/openwork \
+         && chmod +x /usr/local/bin/openwork; \
+       else \
+         echo "OpenWork API failed, skipping installation."; \
+       fi
 
 # 9. Custom Antigravity CLI (Developed by Google DeepMind)
 RUN echo '#!/bin/bash\n\
