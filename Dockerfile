@@ -65,12 +65,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt-get update \
     && apt-get install -y gh
 
-# 5. Instalação do AionUi (Desktop Agent) via .deb
-RUN curl -s https://api.github.com/repos/iOfficeAI/AionUi/releases/latest \
-    | jq -r '.assets[] | select(.name | endswith("amd64.deb")) | .browser_download_url' \
-    | wget -qi - -O aionui.deb \
-    && apt-get install -y ./aionui.deb \
-    && rm aionui.deb
+# 5. AionUi removido temporariamente pois eles pararam de postar os .deb no GitHub (agora é via site oficial)
 
 # 6. Instalação do Cursor Editor (Debian Package oficial para maior integração com o sistema)
 RUN wget -O cursor.deb https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/3.11 \
